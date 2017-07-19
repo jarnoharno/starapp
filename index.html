@@ -27,7 +27,7 @@ img {
 </canvas>
 </body>
 <script>
-var maxfps = 50
+var maxfps = 100;
 var dpi = 2;
 var mapName = 'map.png';
 var starsName = 'stars.png';
@@ -145,12 +145,37 @@ function mouseleave(e) {
     drag = false;
 }
 function touchstart(e) {
+    e.preventDefault();
+    if (e.touches.length > 1) return;
+    drag = true;
+    var t = e.changedTouches[0]; 
+    var x = t.clientX;
+    var y = t.clientY;
+    dragstartx = x;
+    dragstarty = y;
+    dragstartoffsetx = offsetx;
+    dragstartoffsety = offsety;
 }
 function touchmove(e) {
+    e.preventDefault();
+    if (e.touches.length > 1) return;
+    if (!drag) return;
+    var t = e.changedTouches[0];    
+    var x = t.clientX;
+    var y = t.clientY;
+    dragmovex = x;
+    dragmovey = y;
+    var dx = dragmovex - dragstartx
+    var dy = dragmovey - dragstarty;
+    offsetx = dragstartoffsetx + dpi * dx / scale;
+    offsety = dragstartoffsety + dpi * dy / scale;
+    requestdraw();
 }
 function touchend(e) {
+    drag = false;
 }
 function touchcancel(e) {
+    drag = false;
 }
 function init() {
     canvas = document.getElementById('canvas');
@@ -165,6 +190,10 @@ function init() {
     canvas.addEventListener('mousemove', mousemove, false);
     canvas.addEventListener('mouseup', mouseup, false);
     canvas.addEventListener('mouseleave', mouseleave, false);
+    canvas.addEventListener('touchstart', touchstart, false);
+    canvas.addEventListener('touchmove', touchmove, false);
+    canvas.addEventListener('touchend', touchend, false);
+    canvas.addEventListener('touchcancel', touchcancel, false);
     resize();
 }
 function initImages() {
