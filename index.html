@@ -59,7 +59,6 @@ var x;
 var y;
 var dw;
 var dh;
-
 function update() {
     var w = canvas.width;
     var h = canvas.height;
@@ -75,7 +74,7 @@ function update() {
         dh = h;
         scale = hratio;
         x = (w - dw) / 2;
-        y = 0; 
+        y = 0;
     }
 }
 function requestdraw() {
@@ -84,27 +83,17 @@ function requestdraw() {
 function draw(timestamp) {
     if (timestamp - ts < 1000 / maxfps) return;
     ts = timestamp;
-    //console.log(timestamp);
     drawnow();
 }
 function drawnow() {
     var map = images[mapName];
     var stars = images[starsName];
     var pisces = images[piscesName];
-
-    ctx.drawImage(map,x,y,dw,dh);
-    ctx.drawImage(pisces,x,y,dw,dh);
-    
     var px = x + scale * offsetx;
     var py = y + scale * offsety;
+    ctx.drawImage(map,x,y,dw,dh);
+    ctx.drawImage(pisces,x,y,dw,dh);
     ctx.drawImage(stars,px,py,dw,dh);
-    
-    ctx.moveTo(0,0);
-    ctx.lineTo(w,h);
-    ctx.moveTo(w,0);
-    ctx.lineTo(0,h);
-    
-    ctx.stroke();
 }
 function resize() {
     var w = window.innerWidth;
@@ -117,19 +106,15 @@ function resize() {
     update();
     drawnow();
 }
-function mousedown(e) {
+function startdrag(x, y) {
     drag = true;
-    var x = e.offsetX;
-    var y = e.offsetY;
     dragstartx = x;
     dragstarty = y;
     dragstartoffsetx = offsetx;
     dragstartoffsety = offsety;
 }
-function mousemove(e) {
+function movedrag(x, y) {
     if (!drag) return;
-    var x = e.offsetX;
-    var y = e.offsetY;
     dragmovex = x;
     dragmovey = y;
     var dx = dragmovex - dragstartx
@@ -138,44 +123,48 @@ function mousemove(e) {
     offsety = dragstartoffsety + dpi * dy / scale;
     requestdraw();
 }
-function mouseup(e) {
+function stopdrag() {
     drag = false;
 }
+function mousedown(e) {
+    var x = e.offsetX;
+    var y = e.offsetY;
+    startdrag(x, y);
+}
+function mousemove(e) {
+    var x = e.offsetX;
+    var y = e.offsetY;
+    movedrag(x, y);
+}
+function mouseup(e) {
+    stopdrag();
+}
 function mouseleave(e) {
-    drag = false;
+    stopdrag();
 }
 function touchstart(e) {
     e.preventDefault();
     if (e.touches.length > 1) return;
-    drag = true;
-    var t = e.changedTouches[0]; 
+    var t = e.changedTouches[0];
     var x = t.clientX;
     var y = t.clientY;
-    dragstartx = x;
-    dragstarty = y;
-    dragstartoffsetx = offsetx;
-    dragstartoffsety = offsety;
+    startdrag(x, y);
 }
 function touchmove(e) {
     e.preventDefault();
     if (e.touches.length > 1) return;
-    if (!drag) return;
-    var t = e.changedTouches[0];    
+    var t = e.changedTouches[0];
     var x = t.clientX;
     var y = t.clientY;
-    dragmovex = x;
-    dragmovey = y;
-    var dx = dragmovex - dragstartx
-    var dy = dragmovey - dragstarty;
-    offsetx = dragstartoffsetx + dpi * dx / scale;
-    offsety = dragstartoffsety + dpi * dy / scale;
-    requestdraw();
+    movedrag(x, y);
 }
 function touchend(e) {
-    drag = false;
+    e.preventDefault();
+    stopdrag();
 }
 function touchcancel(e) {
-    drag = false;
+    e.preventDefault();
+    stopdrag();
 }
 function init() {
     canvas = document.getElementById('canvas');
@@ -196,20 +185,21 @@ function init() {
     canvas.addEventListener('touchcancel', touchcancel, false);
     resize();
 }
-function initImages() {
+function initimages() {
     for (var i = 0; i < imageNames.length; i++) {
         var image = new Image();
         var name = imageNames[i];
         image.src = name;
-        image.onload = function() {
-            loadedImagesCount++;
-            if (loadedImagesCount >= imageNames.length) {
-                init();                
-            }
-        };
+        image.onload = onimageload;
         images[name] = image;
     }
 }
-document.addEventListener('DOMContentLoaded', initImages, false);
+function onimageload() {
+    loadedImagesCount++;
+    if (loadedImagesCount >= imageNames.length) {
+        init();
+    }
+}
+document.addEventListener('DOMContentLoaded', initimages, false);
 </script>
 </html>
