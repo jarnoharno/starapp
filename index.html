@@ -134,8 +134,6 @@ function drawloading() {
     var metrics = ctx.measureText(loadingtext);
     var tx = (w - metrics.width) / 2;
     var ty = (h - th) / 2;
-    console.log('tx='+tx);
-    console.log('ty='+ty);
     ctx.fillText(loadingtext, tx, ty);
 }
 function resize() {
