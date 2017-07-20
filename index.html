@@ -15,7 +15,7 @@ canvas {
 </style>
 </head>
 <body>
-<canvas>Loading
+<canvas>
 </canvas>
 </body>
 <script>
@@ -27,12 +27,9 @@ var loadingtext = 'Loading Star App...';
 var textheight = 36;
 var maxfps = 100;
 var dpi = 2;
-var bgname = 'bg.jpg';
-var fgname = 'fg.png';
-var loadedimagescount = 0;
+var resourcecount = 3;
+var loadedresourcecount = 0;
 var loaded = false;
-var imagenames = [bgname, fgname];
-var images = {};
 var imageswidth;
 var imagesheight;
 var canvas;
@@ -59,6 +56,15 @@ var x;
 var y;
 var dw;
 var dh;
+var bg = loadimg('bg.jpg');
+var fg = loadimg('fg.png');
+document.addEventListener('DOMContentLoaded', dominit, false);
+function loadimg(src) {
+    var img = new Image()
+    img.src = src;
+    img.onload = onresourceload;
+    return img;
+}
 function clamp(x,l,r) {
     return Math.min(Math.max(l,x),r);
 }
@@ -118,8 +124,6 @@ function drawnow() {
         drawloading();
         return;
     }
-	var bg = images[bgname];
-	var fg = images[fgname];
 	var px = x + scale * offsetx;
 	var py = y + scale * offsety;
 	var pw = scale * fg.naturalWidth;
@@ -209,10 +213,8 @@ function touchcancel(e) {
 	stopdrag();
 }
 function init() {
-	var name = imagenames[0];
-	var img = images[name];
-	imageswidth = img.naturalWidth;
-	imagesheight = img.naturalHeight;
+	imageswidth = bg.naturalWidth;
+	imagesheight = bg.naturalHeight;
 	canvas.addEventListener('mousedown', mousedown, false);
 	canvas.addEventListener('mousemove', mousemove, false);
 	canvas.addEventListener('mouseup', mouseup, false);
@@ -223,26 +225,19 @@ function init() {
 	canvas.addEventListener('touchcancel', touchcancel, false);
 	resize();
 }
-function preinit() {
+function dominit() {
     canvas = document.getElementsByTagName('canvas')[0];
 	ctx = canvas.getContext('2d');
 	ctx.scale(dpi, dpi);
 	window.addEventListener('resize', resize, false);
+	onresourceload();
 	resize();
-	for (var i = 0; i < imagenames.length; i++) {
-		var image = new Image();
-		var name = imagenames[i];
-		image.src = name;
-		image.onload = onimageload;
-		images[name] = image;
-	}
 }
-function onimageload() {
-	if (++loadedimagescount >= imagenames.length) {
+function onresourceload() {
+	if (++loadedresourcecount >= resourcecount) {
 	    loaded = true;
 		init();
 	}
 }
-document.addEventListener('DOMContentLoaded', preinit, false);
 </script>
 </html>
