@@ -35,6 +35,8 @@ var canvas;
 var ctx;
 var offsetx = -220;
 var offsety = -450;
+var targetx = -1600;
+var targety = -643;
 var drag = false;
 var dragstartx;
 var dragstarty;
@@ -63,6 +65,23 @@ function clampoffsetx(x) {
 function clampoffsety(y) {
     var cy = clamp(y,-700,0);
     return cy;
+}
+function distsq(x1, y1, x2, y2) {
+    var dx = x2 - x1;
+    var dy = y2 - y1;
+    var ds = dx * dx + dy * dy;
+    return ds;
+}
+function setoffset(x, y) {
+    var cx = clampoffsetx(x);
+    var cy = clampoffsety(y);
+    var ds = distsq(cx, cy, targetx, targety);
+    if (ds < 120) {
+        cx = targetx;
+        cy = targety;
+    }
+    offsetx = cx;
+    offsety = cy;
 }
 function update() {
 	w = canvas.width;
@@ -141,8 +160,7 @@ function movedrag(x, y) {
 	var dy = dragmovey - dragstarty;
 	var ox = dragstartoffsetx + dpi * dx / scale;
 	var oy = dragstartoffsety + dpi * dy / scale;
-	offsetx = clampoffsetx(ox);
-	offsety = clampoffsety(oy);
+	setoffset(ox, oy);
 	requestdraw();
 }
 function stopdrag() {
