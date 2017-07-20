@@ -60,38 +60,38 @@ var bg = loadimg('bg.jpg');
 var fg = loadimg('fg.png');
 document.addEventListener('DOMContentLoaded', dominit, false);
 function loadimg(src) {
-    var img = new Image()
-    img.src = src;
-    img.onload = onresourceload;
-    return img;
+	var img = new Image()
+	img.src = src;
+	img.onload = onresourceload;
+	return img;
 }
 function clamp(x,l,r) {
-    return Math.min(Math.max(l,x),r);
+	return Math.min(Math.max(l,x),r);
 }
 function clampoffsetx(x) {
-    var cx = clamp(x,-1700,0);
-    return cx;
+	var cx = clamp(x,-1700,0);
+	return cx;
 }
 function clampoffsety(y) {
-    var cy = clamp(y,-700,0);
-    return cy;
+	var cy = clamp(y,-700,0);
+	return cy;
 }
 function distsq(x1, y1, x2, y2) {
-    var dx = x2 - x1;
-    var dy = y2 - y1;
-    var ds = dx * dx + dy * dy;
-    return ds;
+	var dx = x2 - x1;
+	var dy = y2 - y1;
+	var ds = dx * dx + dy * dy;
+	return ds;
 }
 function setoffset(x, y) {
-    var cx = clampoffsetx(x);
-    var cy = clampoffsety(y);
-    var ds = distsq(cx, cy, targetx, targety);
-    if (ds < 120) {
-        cx = targetx;
-        cy = targety;
-    }
-    offsetx = cx;
-    offsety = cy;
+	var cx = clampoffsetx(x);
+	var cy = clampoffsety(y);
+	var ds = distsq(cx, cy, targetx, targety);
+	if (ds < 120) {
+		cx = targetx;
+		cy = targety;
+	}
+	offsetx = cx;
+	offsety = cy;
 }
 function update() {
 	w = canvas.width;
@@ -120,10 +120,10 @@ function draw(timestamp) {
 	drawnow();
 }
 function drawnow() {
-    if (!loaded) {
-        drawloading();
-        return;
-    }
+	if (!loaded) {
+		drawloading();
+		return;
+	}
 	var px = x + scale * offsetx;
 	var py = y + scale * offsety;
 	var pw = scale * fg.naturalWidth;
@@ -132,13 +132,13 @@ function drawnow() {
 	ctx.drawImage(fg,px,py,pw,ph);
 }
 function drawloading() {
-    var th = dpi * textheight;
-    var f = th+'px sans-serif';
-    ctx.font = f
-    var metrics = ctx.measureText(loadingtext);
-    var tx = (w - metrics.width) / 2;
-    var ty = (h - th) / 2;
-    ctx.fillText(loadingtext, tx, ty);
+	var th = dpi * textheight;
+	var f = th+'px sans-serif';
+	ctx.font = f
+	var metrics = ctx.measureText(loadingtext);
+	var tx = (w - metrics.width) / 2;
+	var ty = (h - th) / 2;
+	ctx.fillText(loadingtext, tx, ty);
 }
 function resize() {
 	var ww = window.innerWidth;
@@ -226,7 +226,7 @@ function init() {
 	resize();
 }
 function dominit() {
-    canvas = document.getElementsByTagName('canvas')[0];
+	canvas = document.getElementsByTagName('canvas')[0];
 	ctx = canvas.getContext('2d');
 	ctx.scale(dpi, dpi);
 	window.addEventListener('resize', resize, false);
@@ -235,7 +235,7 @@ function dominit() {
 }
 function onresourceload() {
 	if (++loadedresourcecount >= resourcecount) {
-	    loaded = true;
+		loaded = true;
 		init();
 	}
 }
