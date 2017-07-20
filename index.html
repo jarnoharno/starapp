@@ -15,24 +15,26 @@ canvas {
 </style>
 </head>
 <body>
-<canvas>
+<canvas>Loading
 </canvas>
 </body>
 <script>
+var loadingtext = 'Loading Star App...';
+var textheight = 36;
 var maxfps = 100;
 var dpi = 2;
-var mapName = 'map.png';
-var starsName = 'stars.png';
-var piscesName = 'pisces.png';
-var loadedImagesCount = 0;
-var imageNames = [mapName, starsName, piscesName];
+var bgname = 'bg.jpg';
+var fgname = 'fg.png';
+var loadedimagescount = 0;
+var loaded = false;
+var imagenames = [bgname, fgname];
 var images = {};
-var imagesWidth;
-var imagesHeight;
+var imageswidth;
+var imagesheight;
 var canvas;
 var ctx;
-var offsetx = 0;
-var offsety = 0;
+var offsetx = -220;
+var offsety = -450;
 var drag = false;
 var dragstartx;
 var dragstarty;
@@ -51,18 +53,29 @@ var x;
 var y;
 var dw;
 var dh;
+function clamp(x,l,r) {
+    return Math.min(Math.max(l,x),r);
+}
+function clampoffsetx(x) {
+    var cx = clamp(x,-1600,0);
+    return cx;
+}
+function clampoffsety(y) {
+    var cy = clamp(y,-700,0);
+    return cy;
+}
 function update() {
-	var w = canvas.width;
-	var h = canvas.height;
-	wratio = w / imagesWidth;
-	hratio = h / imagesHeight;
+	w = canvas.width;
+	h = canvas.height;
+	wratio = w / imageswidth;
+	hratio = h / imagesheight;
 	scale = wratio;
 	dw = w;
-	dh = scale * imagesHeight;
+	dh = scale * imagesheight;
 	x = 0;
 	y = (h - dh) / 2;
 	if (hratio > wratio) {
-		dw = hratio * imagesWidth;
+		dw = hratio * imageswidth;
 		dh = h;
 		scale = hratio;
 		x = (w - dw) / 2;
@@ -78,22 +91,37 @@ function draw(timestamp) {
 	drawnow();
 }
 function drawnow() {
-	var map = images[mapName];
-	var stars = images[starsName];
-	var pisces = images[piscesName];
+    if (!loaded) {
+        drawloading();
+        return;
+    }
+	var bg = images[bgname];
+	var fg = images[fgname];
 	var px = x + scale * offsetx;
 	var py = y + scale * offsety;
-	ctx.drawImage(map,x,y,dw,dh);
-	ctx.drawImage(pisces,x,y,dw,dh);
-	ctx.drawImage(stars,px,py,dw,dh);
+	var pw = scale * fg.naturalWidth;
+	var ph = scale * fg.naturalHeight
+	ctx.drawImage(bg,x,y,dw,dh);
+	ctx.drawImage(fg,px,py,pw,ph);
+}
+function drawloading() {
+    var th = dpi * textheight;
+    var f = th+'px sans-serif';
+    ctx.font = f
+    var metrics = ctx.measureText(loadingtext);
+    var tx = (w - metrics.width) / 2;
+    var ty = (h - th) / 2;
+    console.log('tx='+tx);
+    console.log('ty='+ty);
+    ctx.fillText(loadingtext, tx, ty);
 }
 function resize() {
-	var w = window.innerWidth;
-	var h = window.innerHeight;
-	canvas.width = w * dpi;
-	canvas.height = h * dpi;
-	canvas.style.width = w+'px';
-	canvas.style.height = h+'px';
+	var ww = window.innerWidth;
+	var wh = window.innerHeight;
+	canvas.width = ww * dpi;
+	canvas.height = wh * dpi;
+	canvas.style.width = ww+'px';
+	canvas.style.height = wh+'px';
 	drag = false;
 	update();
 	drawnow();
@@ -111,8 +139,10 @@ function movedrag(x, y) {
 	dragmovey = y;
 	var dx = dragmovex - dragstartx
 	var dy = dragmovey - dragstarty;
-	offsetx = dragstartoffsetx + dpi * dx / scale;
-	offsety = dragstartoffsety + dpi * dy / scale;
+	var ox = dragstartoffsetx + dpi * dx / scale;
+	var oy = dragstartoffsety + dpi * dy / scale;
+	offsetx = clampoffsetx(ox);
+	offsety = clampoffsety(oy);
 	requestdraw();
 }
 function stopdrag() {
@@ -159,14 +189,10 @@ function touchcancel(e) {
 	stopdrag();
 }
 function init() {
-	canvas = document.getElementsByTagName('canvas')[0];
-	ctx = canvas.getContext('2d');
-	ctx.scale(dpi, dpi);
-	var name = imageNames[0];
+	var name = imagenames[0];
 	var img = images[name];
-	imagesWidth = img.naturalWidth;
-	imagesHeight = img.naturalHeight;
-	window.addEventListener('resize', resize, false);
+	imageswidth = img.naturalWidth;
+	imagesheight = img.naturalHeight;
 	canvas.addEventListener('mousedown', mousedown, false);
 	canvas.addEventListener('mousemove', mousemove, false);
 	canvas.addEventListener('mouseup', mouseup, false);
@@ -177,21 +203,26 @@ function init() {
 	canvas.addEventListener('touchcancel', touchcancel, false);
 	resize();
 }
-function initimages() {
-	for (var i = 0; i < imageNames.length; i++) {
+function preinit() {
+    canvas = document.getElementsByTagName('canvas')[0];
+	ctx = canvas.getContext('2d');
+	ctx.scale(dpi, dpi);
+	window.addEventListener('resize', resize, false);
+	resize();
+	for (var i = 0; i < imagenames.length; i++) {
 		var image = new Image();
-		var name = imageNames[i];
+		var name = imagenames[i];
 		image.src = name;
 		image.onload = onimageload;
 		images[name] = image;
 	}
 }
 function onimageload() {
-	loadedImagesCount++;
-	if (loadedImagesCount >= imageNames.length) {
+	if (++loadedimagescount >= imagenames.length) {
+	    loaded = true;
 		init();
 	}
 }
-document.addEventListener('DOMContentLoaded', initimages, false);
+document.addEventListener('DOMContentLoaded', preinit, false);
 </script>
 </html>
